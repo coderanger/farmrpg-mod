@@ -1,16 +1,20 @@
 import 'bootstrap/dist/css/bootstrap.css'
+import './layout.css'
 
 import ClipboardJS from 'clipboard'
-import { signInWithCustomToken } from 'firebase/auth'
+import { signInWithCustomToken, signOut } from 'firebase/auth'
 import { Link } from 'gatsby'
+import { observer } from 'mobx-react-lite'
 import React, { useContext, useEffect } from 'react'
 import Button from 'react-bootstrap/Button'
 import Container from 'react-bootstrap/Container'
+import Dropdown from 'react-bootstrap/Dropdown'
 import Form from 'react-bootstrap/Form'
-import Navbar from 'react-bootstrap/Navbar'
 import Toast from 'react-bootstrap/Toast'
 import ToastContainer from 'react-bootstrap/ToastContainer'
 import { Helmet } from 'react-helmet'
+
+import { BsFillPersonFill } from '@react-icons/all-files/bs/BsFillPersonFill'
 
 import { GlobalContext } from '../utils/context'
 
@@ -64,7 +68,7 @@ interface LayoutProps {
   children: React.ReactNode
 }
 
-export default ({ children }: LayoutProps) => {
+export default observer(({ children }: LayoutProps) => {
   const ctx = useContext(GlobalContext)
 
   let content = children
@@ -120,17 +124,20 @@ export default ({ children }: LayoutProps) => {
         ))}
       </ToastContainer>
     </div>
-    <Navbar bg="light" expand="lg">
-      <Container>
-        <Link className='navbar-brand' to="/">
-          <span className="d-none d-sm-inline">Mod Tools</span>
-        </Link>
-      </Container>
-    </Navbar>
-    <main>
-      <Container>
-        {content}
-      </Container>
+    <main className="d-flex h-100" onMouseMove={evt => ctx.state?.ui.ping()} onTouchStart={evt => ctx.state?.ui.ping()}>
+      <div className="border-end border-4 me-2 bg-secondary d-flex flex-column gap-2 align-items-center py-2" css={{width: 80}}>
+        <Dropdown>
+          <Dropdown.Toggle id="user-menu">
+            <BsFillPersonFill />
+          </Dropdown.Toggle>
+          <Dropdown.Menu>
+            <Dropdown.Item>{ctx.user?.email}</Dropdown.Item>
+            <Dropdown.Divider />
+            <Dropdown.Item onClick={() => signOut(ctx.auth!)}>Sign Out</Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown>
+      </div>
+      {content}
     </main>
   </>)
-}
+})

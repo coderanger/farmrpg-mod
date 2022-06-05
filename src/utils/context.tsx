@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react'
 
 import { useToasts } from '../hooks/toasts'
 import { app } from './firebase'
-import { ChannelStore } from '../stores/channels'
+import { RootStore } from '../stores/root'
 
 import type { FirebaseApp } from "firebase/app"
 import type { Analytics } from "firebase/analytics"
@@ -21,7 +21,7 @@ export interface GlobalContextProps {
   toasts: ReturnType<typeof useToasts>[0]
   addToast: ReturnType<typeof useToasts>[1]
   removeToast: ReturnType<typeof useToasts>[2]
-  channels: ChannelStore | null
+  state: RootStore | null
 }
 
 export const GlobalContext = React.createContext<GlobalContextProps>({
@@ -33,7 +33,7 @@ export const GlobalContext = React.createContext<GlobalContextProps>({
   toasts: [],
   addToast: () => null,
   removeToast: () => null,
-  channels: null,
+  state: null,
 })
 
 interface ProviderProps {
@@ -46,7 +46,7 @@ export const Provider = ({ children }: ProviderProps) => {
   const [user, setUser] = useState<User | null | undefined>(undefined)
   const [db, setDb] = useState<Firestore | null>(null)
   const [toasts, addToast, removeToast] = useToasts()
-  const [channels, setChannels] = useState<ChannelStore | null>(null)
+  const [state, setState] = useState<RootStore | null>(null)
 
   useEffect(() => {
     if (typeof document !== null) {
@@ -56,12 +56,12 @@ export const Provider = ({ children }: ProviderProps) => {
       setAnalytics(getAnalytics(app))
       const db = getFirestore(app)
       setDb(db)
-      setChannels(new ChannelStore(db))
+      setState(new RootStore(db))
     }
   }, [])
 
   return (
-    <GlobalContext.Provider value={{ firebase: app, analytics, auth, user, db, toasts, addToast, removeToast, channels }}>
+    <GlobalContext.Provider value={{ firebase: app, analytics, auth, user, db, toasts, addToast, removeToast, state }}>
       {children}
     </GlobalContext.Provider>
   )

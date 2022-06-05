@@ -43,8 +43,7 @@ export class Channel {
 
   listen() {
     if (!this.listening) {
-      const q = query(collection(this.db, "rooms", this.channel, "chats"), orderBy("ts", "desc"), limit(10))
-      console.debug("Listening to channel query", q)
+      const q = query(collection(this.db, "rooms", this.channel, "chats"), orderBy("ts", "desc"), limit(20))
       this.unsubscribe = onSnapshot(q, this.onSnapshot, console.error)
     }
   }
@@ -52,7 +51,6 @@ export class Channel {
   onSnapshot(snapshot: QuerySnapshot<DocumentData>) {
     const newMessages: Message[] = []
     snapshot.forEach(msg => {
-      console.debug("Got message", msg.data())
       newMessages.push(new Message(msg.data()))
     })
     this.messages = newMessages
@@ -66,13 +64,17 @@ export class Channel {
   }
 
   pause() {
-    this.paused = true
-    this.unlisten()
+    if (!this.paused) {
+      this.paused = true
+      this.unlisten()
+    }
   }
 
   resume() {
-    this.paused = false
-    this.listen()
+    if (this.paused) {
+      this.paused = false
+      this.listen()
+    }
   }
 }
 
