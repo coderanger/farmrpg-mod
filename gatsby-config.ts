@@ -13,7 +13,16 @@ const config: GatsbyConfig = {
     //     "trackingId": ""
     //   }
     // },
-    "gatsby-plugin-react-helmet"
+    "gatsby-plugin-react-helmet",
+    {
+      resolve: "gatsby-plugin-manifest",
+      options: {
+        name: "Farm RPG Mod",
+        short_name: "mod.buddy.farm",
+        description: "Enhanced moderation tools for Farm RPG.",
+        icon: "src/images/icon.png",
+      },
+    },
   ]
 }
 
