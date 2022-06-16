@@ -13,7 +13,10 @@ const MessageDiv = observer(({msg}: MessageDivProps) => {
   const fixContent = useCallback((elm: HTMLDivElement | null) => {
     if (elm !== null) {
       elm.querySelectorAll("img").forEach(imgElm => {
-        const src = imgElm.getAttribute("src")
+        let src = imgElm.getAttribute("src")
+        if (!src?.startsWith("/")) {
+          src = `/${src}`
+        }
         imgElm.setAttribute("src", `https://farmrpg.com${src}`)
       })
       elm.querySelectorAll("a").forEach(aElm => {
