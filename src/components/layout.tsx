@@ -29,7 +29,7 @@ const Login = ({ctx}: LoginProps) => {
     evt.preventDefault()
     evt.stopPropagation()
 
-    const resp = await fetch("http://localhost:8008/login", {
+    const resp = await fetch("https://api.buddy.farm/login", {
       method: "POST",
       body: JSON.stringify({
         email: (document.getElementById("login-email") as HTMLInputElement | null)?.value,
