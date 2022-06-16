@@ -45,7 +45,7 @@ const Login = ({ctx}: LoginProps) => {
     console.log(firebaseResp)
   }
 
-  return <div className="login">
+  return <div className="login my-2">
     <Form onSubmit={onSubmit}>
       <Form.Group className="mb-3" controlId="login-email">
         <Form.Label>Email address</Form.Label>
@@ -58,7 +58,7 @@ const Login = ({ctx}: LoginProps) => {
       </Form.Group>
 
       <Button variant="primary" type="submit">
-        Submit
+        Log In
       </Button>
     </Form>
   </div>
