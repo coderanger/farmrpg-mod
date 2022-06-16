@@ -44,6 +44,9 @@ const IndexPage = observer(() => {
         <ChannelColumn channelName="help" />
         <ChannelColumn channelName="global" />
         <ChannelColumn channelName="spoilers" />
+        <ChannelColumn channelName="trade" />
+        <ChannelColumn channelName="giveaways" />
+        <ChannelColumn channelName="staff" />
       </div>
     </Layout>
   )
