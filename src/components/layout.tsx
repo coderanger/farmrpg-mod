@@ -2,10 +2,11 @@ import 'bootstrap/dist/css/bootstrap.css'
 import './layout.css'
 
 import ClipboardJS from 'clipboard'
-import { signInWithEmailAndPassword } from 'firebase/auth'
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
+import { FirebaseError } from "@firebase/util"
 import { Link } from 'gatsby'
 import { observer } from 'mobx-react-lite'
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import Container from 'react-bootstrap/Container'
 import Dropdown from 'react-bootstrap/Dropdown'
@@ -26,32 +27,139 @@ interface LoginProps {
 
 const Login = ({ctx}: LoginProps) => {
   const onSubmit: React.FormEventHandler<HTMLFormElement> = async (evt) => {
+    const form = evt.currentTarget
     evt.preventDefault()
     evt.stopPropagation()
 
     const email = (document.getElementById("login-email") as HTMLInputElement | null)?.value
-    const password =  (document.getElementById("login-password") as HTMLInputElement | null)?.value
+    const password = (document.getElementById("login-password") as HTMLInputElement | null)?.value
 
-    await signInWithEmailAndPassword(ctx.auth!, email || "", password || "")
+    if (form.checkValidity()) {
+      await signInWithEmailAndPassword(ctx.auth!, email || "", password || "")
+    }
   }
 
-  return <div className="login my-2">
-    <Form onSubmit={onSubmit}>
-      <Form.Group className="mb-3" controlId="login-email">
-        <Form.Label>Email address</Form.Label>
-        <Form.Control type="email" placeholder="Email" required={true} />
-      </Form.Group>
+  return <Form onSubmit={onSubmit}>
+    <Form.Group className="mb-3" controlId="login-email">
+      <Form.Label>Email address</Form.Label>
+      <Form.Control type="email" placeholder="Email" required={true} />
+    </Form.Group>
 
-      <Form.Group className="mb-3" controlId="login-password">
-        <Form.Label>Password</Form.Label>
-        <Form.Control type="password" placeholder="Password" required={true} />
-      </Form.Group>
+    <Form.Group className="mb-3" controlId="login-password">
+      <Form.Label>Password</Form.Label>
+      <Form.Control type="password" placeholder="Password" required={true} />
+    </Form.Group>
 
-      <Button variant="primary" type="submit">
-        Log In
-      </Button>
-    </Form>
+    <Button variant="primary" type="submit">
+      Log In
+    </Button>
+  </Form>
+}
+
+interface RegisterProps {
+  ctx: GlobalContextProps
+}
+
+const Register = ({ctx}: RegisterProps) => {
+  const [validated, setValidated] = useState(false)
+  const [firebaseError, setFirebaseError] = useState<string | null>(null)
+
+  const onSubmit: React.FormEventHandler<HTMLFormElement> = async (evt) => {
+    const form = evt.currentTarget
+    evt.preventDefault()
+    evt.stopPropagation()
+
+    const email = (document.getElementById("register-email") as HTMLInputElement | null)?.value
+    const password = (document.getElementById("register-password") as HTMLInputElement | null)?.value
+    const password2 = (document.getElementById("register-password2") as HTMLInputElement | null)?.value
+
+    let valid = form.checkValidity()
+    setValidated(true)
+
+    if (password !== password2) {
+      (document.getElementById("register-password2") as HTMLInputElement).setCustomValidity("Passwords must match.")
+      valid = false
+    } else {
+      (document.getElementById("register-password2") as HTMLInputElement).setCustomValidity("")
+    }
+
+    if (!valid) {
+      return
+    }
+
+    try {
+      await createUserWithEmailAndPassword(ctx.auth!, email || "", password || "")
+    } catch (e) {
+      console.log(e)
+      if (e instanceof FirebaseError) {
+        switch (e.code) {
+        case "auth/email-already-in-use":
+          setFirebaseError("Your email is already in use.")
+          break
+        default:
+          setFirebaseError(e.message)
+        }
+      } else {
+        setFirebaseError((e as any).toString())
+      }
+    }
+  }
+
+  return <Form onSubmit={onSubmit} noValidate validated={validated}>
+    <Form.Group className="mb-3" controlId="register-email">
+      <Form.Label>Email address</Form.Label>
+      <Form.Control type="email" placeholder="Email" required={true} />
+    </Form.Group>
+
+    <Form.Group className="mb-3" controlId="register-password">
+      <Form.Label>Password</Form.Label>
+      <Form.Control type="password" placeholder="Password" required={true} />
+    </Form.Group>
+
+    <Form.Group className="mb-3" controlId="register-password2">
+      <Form.Label>Password</Form.Label>
+      <Form.Control type="password" placeholder="Confirm Password" required={true} />
+      <Form.Control.Feedback type="invalid">
+        Passwords must match.
+      </Form.Control.Feedback>
+    </Form.Group>
+
+    {firebaseError && <Form.Group className="mb-3">
+      <Form.Control.Feedback type="invalid" className="d-block">
+        {firebaseError}
+      </Form.Control.Feedback>
+    </Form.Group>}
+
+    <Button variant="primary" type="submit">
+      Register
+    </Button>
+  </Form>
+}
+
+interface LoginOrRegisterProps {
+  ctx: GlobalContextProps
+}
+
+const LoginOrRegister = ({ctx}: LoginOrRegisterProps) => {
+  const [loginMode, setLoginMode] = useState(true)
+
+  if (loginMode) {
+    return <div className="my-2">
+      <h2>Log In</h2>
+      <p>
+        Or <a href="#" onClick={evt => { evt.preventDefault(); setLoginMode(false) }}>register for a new account</a>.
+      </p>
+      <Login ctx={ctx} />
+    </div>
+  } else {
+    return <div className="my-2">
+    <h2>Register</h2>
+    <p>
+      Or <a href="#" onClick={evt => { evt.preventDefault(); setLoginMode(true) }}>log in to your existing account</a>.
+    </p>
+    <Register ctx={ctx} />
   </div>
+  }
 }
 
 interface LayoutProps {
@@ -70,7 +178,7 @@ export default observer(({ children }: LayoutProps) => {
     </>
   } else if (!ctx.state.auth.loggedIn) {
     // User is logged out.
-    content = <Login ctx={ctx} />
+    content = <LoginOrRegister ctx={ctx} />
   } else if (ctx.state.auth.username === null) {
     //
     content = <div>
@@ -78,7 +186,7 @@ export default observer(({ children }: LayoutProps) => {
         Your account isn't recognized.
       </p>
       <p>
-        If you haven't already, please <a href="https://farmrpg.com/index.php#!/sendmessage.php?to=BuddyBot">
+        If you haven't already, please <a href="https://farmrpg.com/index.php#!/sendmessage.php?to=BuddyBot" target="_blank">
         send a DM to the Farm RPG user BuddyBot</a> with the subject "register" and the body
         "register {ctx.state.auth.user?.uid}". Then click reload.
       </p>
