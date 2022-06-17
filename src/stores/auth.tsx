@@ -1,5 +1,5 @@
 import type { Auth, User, IdTokenResult } from "firebase/auth"
-import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth'
+import { getAuth, onAuthStateChanged, signOut, reload } from 'firebase/auth'
 import { action, makeAutoObservable } from 'mobx'
 
 import { app } from '../utils/firebase'
@@ -59,5 +59,11 @@ export class AuthStore {
 
   signOut() {
     signOut(this.auth)
+  }
+
+  reload() {
+    if (this.loggedIn && this.user) {
+      reload(this.user).then(() => this.user?.getIdTokenResult(true).then(this.onIdTokenResult))
+    }
   }
 }

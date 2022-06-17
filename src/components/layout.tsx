@@ -2,7 +2,7 @@ import 'bootstrap/dist/css/bootstrap.css'
 import './layout.css'
 
 import ClipboardJS from 'clipboard'
-import { signInWithEmailAndPassword, signOut } from 'firebase/auth'
+import { signInWithEmailAndPassword } from 'firebase/auth'
 import { Link } from 'gatsby'
 import { observer } from 'mobx-react-lite'
 import React, { useContext, useEffect } from 'react'
@@ -72,9 +72,25 @@ export default observer(({ children }: LayoutProps) => {
     // User is logged out.
     content = <Login ctx={ctx} />
   } else if (ctx.state.auth.username === null) {
-    content = <div>Unmapped firebase UID {ctx.state.auth.user?.uid}</div>
+    //
+    content = <div>
+      <p>
+        Your account isn't recognized.
+      </p>
+      <p>
+        If you haven't already, please <a href="https://farmrpg.com/index.php#!/sendmessage.php?to=BuddyBot">
+        send a DM to the Farm RPG user BuddyBot</a> with the subject "register" and the body
+        "register {ctx.state.auth.user?.uid}". Then click reload.
+      </p>
+      <p>
+        <Button variant="primary" onClick={() => ctx.state?.auth.reload()}>Reload</Button>
+      </p>
+      <p>
+        If this doesn't seem to be working, please contact Coderanger for further assistance.
+      </p>
+    </div>
   } else if (!ctx.state.auth.isStaff) {
-    content = <div>Not authorized</div>
+    content = <div>This tool is only for Farm RPM staff members.</div>
   }
 
   useEffect(() => {
