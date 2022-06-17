@@ -1,5 +1,7 @@
 import type { Auth, User, IdTokenResult } from "firebase/auth"
-import { getAuth, onAuthStateChanged, signOut, reload } from 'firebase/auth'
+import {
+    browserLocalPersistence, getAuth, onAuthStateChanged, reload, setPersistence, signOut
+} from 'firebase/auth'
 import { action, makeAutoObservable } from 'mobx'
 
 import { app } from '../utils/firebase'
@@ -15,6 +17,7 @@ export class AuthStore {
   constructor() {
     makeAutoObservable(this, {"onAuthStateChanged": action.bound, "onIdTokenResult": action.bound})
     this.auth = getAuth(app)
+    setPersistence(this.auth, browserLocalPersistence)
     onAuthStateChanged(this.auth, this.onAuthStateChanged)
   }
 
