@@ -66,7 +66,7 @@ export const ChannelColumn = observer(({channelName}: ChannelColumnProps) => {
   const [channel, setChannel] = useState<Channel | null>(null)
 
   useEffect(() => {
-    if (ctx.state?.channels && ctx.user && !ctx.user.isAnonymous) {
+    if (ctx.state?.channels && ctx.state.auth.loggedIn) {
       setChannel(ctx.state?.channels.listen(channelName))
       return () => ctx.state?.channels?.unlisten(channelName)
     }

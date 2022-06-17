@@ -2,7 +2,7 @@ import 'bootstrap/dist/css/bootstrap.css'
 import './layout.css'
 
 import ClipboardJS from 'clipboard'
-import { signInWithCustomToken, signOut } from 'firebase/auth'
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import { Link } from 'gatsby'
 import { observer } from 'mobx-react-lite'
 import React, { useContext, useEffect } from 'react'
@@ -29,32 +29,22 @@ const Login = ({ctx}: LoginProps) => {
     evt.preventDefault()
     evt.stopPropagation()
 
-    const resp = await fetch("https://api.buddy.farm/login", {
-      method: "POST",
-      body: JSON.stringify({
-        email: (document.getElementById("login-email") as HTMLInputElement | null)?.value,
-        password: (document.getElementById("login-password") as HTMLInputElement | null)?.value,
-      }),
-    })
-    if (!resp.ok) {
-      throw `Error getting login token (${resp.status}): ${await resp.text()}`
-    }
-    const respJson = await resp.json()
+    const email = (document.getElementById("login-email") as HTMLInputElement | null)?.value
+    const password =  (document.getElementById("login-password") as HTMLInputElement | null)?.value
 
-    const firebaseResp = await signInWithCustomToken(ctx.auth!, respJson.signed_jwt)
-    console.log(firebaseResp)
+    await signInWithEmailAndPassword(ctx.auth!, email || "", password || "")
   }
 
   return <div className="login my-2">
     <Form onSubmit={onSubmit}>
       <Form.Group className="mb-3" controlId="login-email">
         <Form.Label>Email address</Form.Label>
-        <Form.Control type="email" placeholder="Email" />
+        <Form.Control type="email" placeholder="Email" required={true} />
       </Form.Group>
 
       <Form.Group className="mb-3" controlId="login-password">
         <Form.Label>Password</Form.Label>
-        <Form.Control type="password" placeholder="Password" />
+        <Form.Control type="password" placeholder="Password" required={true} />
       </Form.Group>
 
       <Button variant="primary" type="submit">
@@ -73,14 +63,18 @@ export default observer(({ children }: LayoutProps) => {
 
   let content = children
 
-  if(ctx.user === undefined) {
+  if(!ctx.state?.auth.ready) {
     // Auth hasn't actually loaded yet.
     content = <>
       <div>Loading ...</div>
     </>
-  } else if (ctx.user === null || ctx.user.isAnonymous) {
+  } else if (!ctx.state.auth.loggedIn) {
     // User is logged out.
     content = <Login ctx={ctx} />
+  } else if (ctx.state.auth.username === null) {
+    content = <div>Unmapped firebase UID {ctx.state.auth.user?.uid}</div>
+  } else if (!ctx.state.auth.isStaff) {
+    content = <div>Not authorized</div>
   }
 
   useEffect(() => {
@@ -131,9 +125,10 @@ export default observer(({ children }: LayoutProps) => {
             <BsFillPersonFill />
           </Dropdown.Toggle>
           <Dropdown.Menu>
-            <Dropdown.Item>{ctx.user?.email}</Dropdown.Item>
+            <Dropdown.Item>{ctx.state?.auth.username}</Dropdown.Item>
+            <Dropdown.Item>{ctx.state?.auth.user?.email}</Dropdown.Item>
             <Dropdown.Divider />
-            <Dropdown.Item onClick={() => signOut(ctx.auth!)}>Sign Out</Dropdown.Item>
+            <Dropdown.Item onClick={() => ctx.state?.auth.signOut()}>Sign Out</Dropdown.Item>
           </Dropdown.Menu>
         </Dropdown>
       </div>
