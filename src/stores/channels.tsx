@@ -1,5 +1,9 @@
-import { action, makeAutoObservable } from "mobx"
-import { collection, query, onSnapshot, Timestamp, orderBy, limit } from "firebase/firestore"
+import {
+    collection, getDocs, getFirestore, limit, onSnapshot, orderBy, query, Timestamp
+} from 'firebase/firestore'
+import { action, makeAutoObservable } from 'mobx'
+
+import { app } from '../utils/firebase'
 
 import type { Firestore, QuerySnapshot, DocumentData, Unsubscribe } from "firebase/firestore"
 
@@ -11,6 +15,7 @@ export class Message {
   ts: Timestamp
   content: string
   deleted: boolean
+  mentions: string[]
 
   constructor(data: Record<string, any>) {
     makeAutoObservable(this)
@@ -21,6 +26,7 @@ export class Message {
     this.ts = data.ts
     this.content = data.content
     this.deleted = data.deleted
+    this.mentions = data.mentions
   }
 }
 
@@ -81,10 +87,21 @@ export class Channel {
 export class ChannelStore {
   db: Firestore
   channels: Record<string, Channel> = {}
+  availableChannels: string[] = []
 
-  constructor(db: Firestore) {
-    makeAutoObservable(this)
-    this.db = db
+  constructor() {
+    makeAutoObservable(this, {"updateAvailableChannels": action.bound})
+    this.db = getFirestore(app)
+    getDocs(collection(this.db, "rooms")).then(this.updateAvailableChannels)
+  }
+
+  updateAvailableChannels(resp: QuerySnapshot<DocumentData>) {
+    const newChannels = []
+    for (const doc of resp.docs) {
+      newChannels.push(doc.id)
+    }
+    newChannels.sort()
+    this.availableChannels = newChannels
   }
 
   listen(channel: string) {

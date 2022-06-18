@@ -21,8 +21,10 @@ export interface GlobalContextProps {
   toasts: ReturnType<typeof useToasts>[0]
   addToast: ReturnType<typeof useToasts>[1]
   removeToast: ReturnType<typeof useToasts>[2]
-  state: RootStore | null
+  state: RootStore
 }
+
+export const RootState = new RootStore()
 
 export const GlobalContext = React.createContext<GlobalContextProps>({
   firebase: null,
@@ -33,7 +35,7 @@ export const GlobalContext = React.createContext<GlobalContextProps>({
   toasts: [],
   addToast: () => null,
   removeToast: () => null,
-  state: null,
+  state: RootState,
 })
 
 interface ProviderProps {
@@ -46,7 +48,7 @@ export const Provider = ({ children }: ProviderProps) => {
   const [user, setUser] = useState<User | null | undefined>(undefined)
   const [db, setDb] = useState<Firestore | null>(null)
   const [toasts, addToast, removeToast] = useToasts()
-  const [state, setState] = useState<RootStore | null>(null)
+  const [state, setState] = useState<RootStore>(RootState)
 
   useEffect(() => {
     if (typeof document !== null) {
@@ -56,7 +58,6 @@ export const Provider = ({ children }: ProviderProps) => {
       setAnalytics(getAnalytics(app))
       const db = getFirestore(app)
       setDb(db)
-      setState(new RootStore(db))
     }
   }, [])
 

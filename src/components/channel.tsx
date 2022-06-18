@@ -2,14 +2,17 @@
 import type { Channel, Message } from "../stores/channels"
 import { observer } from 'mobx-react-lite'
 import { useCallback, useContext, useEffect, useState } from 'react'
+import CloseButton from 'react-bootstrap/CloseButton'
 
 import { GlobalContext } from '../utils/context'
+import { classNames } from '../utils/css'
 
 interface MessageDivProps {
   msg: Message
 }
 
 const MessageDiv = observer(({msg}: MessageDivProps) => {
+  const ctx = useContext(GlobalContext)
   const fixContent = useCallback((elm: HTMLDivElement | null) => {
     if (elm !== null) {
       elm.querySelectorAll("img").forEach(imgElm => {
@@ -29,7 +32,15 @@ const MessageDiv = observer(({msg}: MessageDivProps) => {
     }
   }, [msg.content])
 
-  return <div className={`mb-2 ${msg.deleted ? "bg-danger text-light" : ""}`}>
+  const isMention = !!(ctx.state?.auth.username && msg.mentions.includes(ctx.state?.auth.username))
+
+  return <div className={classNames(
+    "mb-2",
+    {
+      "bg-danger text-light": msg.deleted,
+      "border border-info border-3 border-start-0": isMention,
+    },
+  )}>
     <div className={`text-${msg.deleted ? "light" : "secondary"} fw-light fst-italic`}>{msg.ts.toDate().toLocaleString()}</div>
     <div className="fw-bold"><img src={`https://farmrpg.com/img/emblems/${msg.emblem}`} css={{height: 16, marginRight: 4}} />{msg.username}</div>
     <div
@@ -70,9 +81,10 @@ export const ChannelColumn = observer(({channelName}: ChannelColumnProps) => {
       setChannel(ctx.state?.channels.listen(channelName))
       return () => ctx.state?.channels?.unlisten(channelName)
     }
-  }, [channelName, ctx.db, ctx.state?.channels])
+  }, [channelName, ctx.db, ctx.state?.channels, ctx.state?.auth.loggedIn])
 
   return <div className="h-100 border-end border-4" css={{width: 400}}>
+    <CloseButton className="float-end m-2" onClick={() => ctx.state?.settings.removeChannel(channelName)} />
     <div className="mb-2 text-center fs-2 fw-bold text-uppercase">{channelName}</div>
     {channel?.paused ? <div>Paused</div> : <MessageList channel={channel} />}
   </div>

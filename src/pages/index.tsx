@@ -9,22 +9,18 @@ import { ChannelColumn } from '../components/channel'
 import Layout from '../components/layout'
 import { GlobalContext } from '../utils/context'
 
+const ChannelColumnList = observer(() => {
+  const ctx = useContext(GlobalContext)
+  console.log("channels", ctx.state.settings.channels)
+  return <>
+    {ctx.state.settings.channels.map(chan =>
+      <ChannelColumn channelName={chan} key={chan} />
+    )}
+  </>
+})
+
 const IndexPage = observer(() => {
   const ctx = useContext(GlobalContext)
-  // const [rooms, setRooms] = useState<string[]>([])
-
-  // useEffect(() => {
-  //   if (ctx.db && ctx.user && !ctx.user.isAnonymous) {
-  //     const newRooms: string[] = []
-  //     getDocs(collection(ctx.db, "rooms")).then(resp => {
-  //       for (const doc of resp.docs) {
-  //         newRooms.push(doc.id)
-  //       }
-  //       setRooms(newRooms)
-  //     }).catch(console.error)
-
-  //   }
-  // }, [ctx.db, ctx.user])
 
   useEffect(() => {
     if (ctx.state) {
@@ -41,12 +37,7 @@ const IndexPage = observer(() => {
   return (
     <Layout>
       <div className="d-flex gap-3">
-        <ChannelColumn channelName="help" />
-        <ChannelColumn channelName="global" />
-        <ChannelColumn channelName="spoilers" />
-        <ChannelColumn channelName="trade" />
-        <ChannelColumn channelName="giveaways" />
-        <ChannelColumn channelName="staff" />
+        <ChannelColumnList />
       </div>
     </Layout>
   )

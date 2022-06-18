@@ -16,6 +16,7 @@ import ToastContainer from 'react-bootstrap/ToastContainer'
 import { Helmet } from 'react-helmet'
 
 import { BsFillPersonFill } from '@react-icons/all-files/bs/BsFillPersonFill'
+import { BsPlus } from "@react-icons/all-files/bs/BsPlus"
 
 import { GlobalContext } from '../utils/context'
 
@@ -162,6 +163,18 @@ const LoginOrRegister = ({ctx}: LoginOrRegisterProps) => {
   }
 }
 
+const ChannelMenuList = observer(() => {
+  const ctx = useContext(GlobalContext)
+  return <>
+    {(ctx.state?.channels.availableChannels || []).map(chan => {
+      if (ctx.state?.settings.channels.slice().includes(chan)) {
+        return null
+      }
+      return <Dropdown.Item key={chan} onClick={() => ctx.state?.settings.addChannel(chan)}>{chan}</Dropdown.Item>
+    })}
+  </>
+})
+
 interface LayoutProps {
   children: React.ReactNode
 }
@@ -253,6 +266,14 @@ export default observer(({ children }: LayoutProps) => {
             <Dropdown.Item>{ctx.state?.auth.user?.email}</Dropdown.Item>
             <Dropdown.Divider />
             <Dropdown.Item onClick={() => ctx.state?.auth.signOut()}>Sign Out</Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown>
+        <Dropdown>
+          <Dropdown.Toggle id="channel-menu">
+            <BsPlus />
+          </Dropdown.Toggle>
+          <Dropdown.Menu>
+            <ChannelMenuList />
           </Dropdown.Menu>
         </Dropdown>
       </div>
