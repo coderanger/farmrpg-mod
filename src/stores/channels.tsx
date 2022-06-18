@@ -70,7 +70,7 @@ export class Channel {
 
   listen() {
     if (!this.listening) {
-      const q = query(collection(this.db, "rooms", this.channel, "chats"), orderBy("ts", "desc"), limit(20))
+      const q = query(collection(this.db, "rooms", this.channel, "chats"), orderBy("ts", "desc"), limit(200))
       this.unsubscribe = onSnapshot(q, this.onSnapshot, console.error)
     }
   }
