@@ -26,10 +26,12 @@ const IndexPage = observer(() => {
   useEffect(() => {
     if (ctx.state) {
       return autorun(() => {
-        if (ctx.state?.ui.isIdle) {
-          ctx.state?.channels.pause()
+        if (ctx.state.ui.isIdle) {
+          ctx.state.channels.pause()
+          ctx.state.mentions.pause()
         } else {
-          ctx.state?.channels.resume()
+          ctx.state.channels.resume()
+          ctx.state.mentions.resume()
         }
       })
     }

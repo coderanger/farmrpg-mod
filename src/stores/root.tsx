@@ -1,22 +1,26 @@
+import { getFirestore } from 'firebase/firestore'
 import { configure, makeAutoObservable } from 'mobx'
 
+import { app } from '../utils/firebase'
 import { AuthStore } from './auth'
 import { ChannelStore } from './channels'
+import { MentionsStore } from './mentions'
 import { Settings } from './settings'
 import { UIState } from './ui'
-
-import type { Firestore } from "firebase/firestore"
 
 export class RootStore {
   auth: AuthStore
   channels: ChannelStore
+  mentions: MentionsStore
   settings: Settings
   ui: UIState
 
   constructor() {
     makeAutoObservable(this)
+    const db = getFirestore(app)
     this.auth = new AuthStore()
-    this.channels = new ChannelStore()
+    this.channels = new ChannelStore(db)
+    this.mentions = new MentionsStore(db, this.auth)
     this.settings = new Settings()
     this.ui = new UIState()
   }

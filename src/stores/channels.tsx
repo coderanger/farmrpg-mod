@@ -1,9 +1,7 @@
 import {
-    collection, getDocs, getFirestore, limit, onSnapshot, orderBy, query, Timestamp
+    collection, getDocs, limit, onSnapshot, orderBy, query, Timestamp
 } from 'firebase/firestore'
 import { action, makeAutoObservable, observable } from 'mobx'
-
-import { app } from '../utils/firebase'
 
 import type { Firestore, QuerySnapshot, DocumentData, Unsubscribe } from "firebase/firestore"
 
@@ -16,9 +14,12 @@ export class Message {
   content: string
   deleted: boolean
   mentions: string[]
+  focus: boolean = false
+  focusTimer: number | undefined = undefined
+  element: HTMLDivElement | null = null
 
   constructor(data: Record<string, any>) {
-    makeAutoObservable(this)
+    makeAutoObservable(this, {clearFocus: action.bound, setElement: action.bound})
     this.id = data.id
     this.room = data.room
     this.username = data.username
@@ -27,6 +28,26 @@ export class Message {
     this.content = data.content
     this.deleted = data.deleted
     this.mentions = data.mentions
+  }
+
+  setElement(element: HTMLDivElement | null) {
+    this.element = element
+  }
+
+  pingFocus() {
+    if (this.focusTimer !== undefined) {
+      window.clearTimeout(this.focusTimer)
+    }
+    this.focus = true
+    this.focusTimer = window.setTimeout(this.clearFocus, 250)
+    if (this.element !== null) {
+      this.element.scrollIntoView({behavior: "smooth", block: "nearest"})
+    }
+  }
+
+  clearFocus() {
+    this.focus = false
+    this.focusTimer = undefined
   }
 }
 
@@ -89,9 +110,9 @@ export class ChannelStore {
   channels: Record<string, Channel> = {}
   readonly availableChannels = observable<string>([])
 
-  constructor() {
+  constructor(db: Firestore) {
     makeAutoObservable(this, {"updateAvailableChannels": action.bound})
-    this.db = getFirestore(app)
+    this.db = db
     if (typeof document !== "undefined") {
       getDocs(collection(this.db, "rooms")).then(this.updateAvailableChannels)
     }

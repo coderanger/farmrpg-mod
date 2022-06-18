@@ -16,9 +16,10 @@ import ToastContainer from 'react-bootstrap/ToastContainer'
 import { Helmet } from 'react-helmet'
 
 import { BsFillPersonFill } from '@react-icons/all-files/bs/BsFillPersonFill'
-import { BsPlus } from "@react-icons/all-files/bs/BsPlus"
+import { FaPlus } from "@react-icons/all-files/fa/FaPlus"
 
 import { GlobalContext } from '../utils/context'
+import { MentionsMenu } from './mentions'
 
 import type { GlobalContextProps } from '../utils/context'
 
@@ -270,12 +271,13 @@ export default observer(({ children }: LayoutProps) => {
         </Dropdown>
         <Dropdown>
           <Dropdown.Toggle id="channel-menu">
-            <BsPlus />
+            <FaPlus />
           </Dropdown.Toggle>
           <Dropdown.Menu>
             <ChannelMenuList />
           </Dropdown.Menu>
         </Dropdown>
+        <MentionsMenu />
       </div>
       {content}
     </main>
