@@ -16,6 +16,7 @@ const ChannelColumnList = observer(() => {
     {ctx.state.settings.channels.map(chan =>
       <ChannelColumn channelName={chan} key={chan} />
     )}
+    {ctx.state.settings.channels.length === 0 && <div>Use the + button in the sidebar to add some channels.</div>}
   </>
 })
 
