@@ -54,18 +54,19 @@ export class MentionsStore {
   }
 
   onSnapshot(snapshot: QuerySnapshot<DocumentData>) {
+    const existingMessages: Record<string, boolean> = {}
+    for (const msg of this.mentions) {
+      existingMessages[msg.id] = true
+    }
     const newMessages: Message[] = []
     snapshot.forEach(msg => {
       newMessages.push(new Message(msg.data()))
+      if (this.pendingInitialized && !existingMessages[msg.id]) {
+        this.pending++
+      }
     })
     this.mentions.replace(newMessages)
-    if (this.pendingInitialized) {
-      snapshot.docChanges().forEach(change => {
-        if (change.type === "added") {
-          this.pending++
-        }
-      })
-    } else {
+    if (!this.pendingInitialized) {
       this.pendingInitialized = true
     }
   }
