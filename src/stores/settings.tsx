@@ -7,7 +7,7 @@ export class Settings {
   readonly channels = observable<string>([])
 
   constructor(localStorageKey: string = DEFAULT_LOCAL_STORAGE_KEY) {
-    makeAutoObservable(this)//, {channels: observable.array()})
+    makeAutoObservable(this)
     this.key = localStorageKey
     const raw = typeof localStorage === "undefined" ? null : localStorage.getItem(localStorageKey)
     if (raw) {

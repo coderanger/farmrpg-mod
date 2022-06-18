@@ -1,7 +1,7 @@
 import {
     collection, getDocs, getFirestore, limit, onSnapshot, orderBy, query, Timestamp
 } from 'firebase/firestore'
-import { action, makeAutoObservable } from 'mobx'
+import { action, makeAutoObservable, observable } from 'mobx'
 
 import { app } from '../utils/firebase'
 
@@ -87,12 +87,14 @@ export class Channel {
 export class ChannelStore {
   db: Firestore
   channels: Record<string, Channel> = {}
-  availableChannels: string[] = []
+  readonly availableChannels = observable<string>([])
 
   constructor() {
     makeAutoObservable(this, {"updateAvailableChannels": action.bound})
     this.db = getFirestore(app)
-    getDocs(collection(this.db, "rooms")).then(this.updateAvailableChannels)
+    if (typeof document !== "undefined") {
+      getDocs(collection(this.db, "rooms")).then(this.updateAvailableChannels)
+    }
   }
 
   updateAvailableChannels(resp: QuerySnapshot<DocumentData>) {
@@ -101,7 +103,7 @@ export class ChannelStore {
       newChannels.push(doc.id)
     }
     newChannels.sort()
-    this.availableChannels = newChannels
+    this.availableChannels.replace(newChannels)
   }
 
   listen(channel: string) {
