@@ -88,7 +88,7 @@ interface MessageListProps {
 }
 
 const MessageList = observer(({channel}: MessageListProps) => {
-  return <div className="h-100" css={{overflowY: "scroll"}}>
+  return <div css={{overflowY: "scroll", height: "calc(100% - 48px)"}}>
     {(channel?.messages || []).map(msg => (
       <MessageDiv key={msg.id} msg={msg} />
     ))}
@@ -111,8 +111,10 @@ export const ChannelColumn = observer(({channelName}: ChannelColumnProps) => {
   }, [channelName, ctx.db, ctx.state?.channels, ctx.state?.auth.loggedIn])
 
   return <div className="h-100 border-end border-4 overflow-hidden" css={{width: 400}}>
-    <CloseButton className="float-end m-2" onClick={() => ctx.state?.settings.removeChannel(channelName)} />
-    <div className="mb-2 text-center fs-2 fw-bold text-uppercase">{channelName}</div>
+    <div css={{height: 48}}>
+      <CloseButton className="float-end m-2" onClick={() => ctx.state?.settings.removeChannel(channelName)} />
+      <div className="mb-2 text-center fs-2 fw-bold text-uppercase">{channelName}</div>
+    </div>
     {channel?.paused ? <div>Paused</div> : <MessageList channel={channel} />}
   </div>
 })
