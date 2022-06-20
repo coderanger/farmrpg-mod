@@ -17,7 +17,7 @@ interface FlagProps {
 
 const Flag = observer(({flag, state}: FlagProps) => {
   // Find the original message if possible.
-  const msg = state.channels.channels[flag.channel]?.messagesById.get(flag.msgId)
+  const msg = flag.getMsg(state.channels)
   if (msg === undefined) {
     return <></>
   }

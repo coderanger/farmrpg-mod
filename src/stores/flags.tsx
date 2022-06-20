@@ -1,6 +1,9 @@
-import { collectionGroup, limit, onSnapshot, orderBy, query, Timestamp } from 'firebase/firestore'
+import { collectionGroup, getDoc, limit, onSnapshot, orderBy, query, Timestamp, doc, DocumentSnapshot } from 'firebase/firestore';
 import { action, makeAutoObservable, observable, when } from 'mobx'
 
+import { Message } from "./channels"
+
+import type { ChannelStore } from "./channels"
 import type { AuthStore } from "./auth"
 import type { Firestore, QuerySnapshot, DocumentData, Unsubscribe } from "firebase/firestore"
 
@@ -9,13 +12,37 @@ export class MessageFlags {
   msgId: string
   ts: Timestamp
   flags: number
+  msg: Message | null = null
+  startedMsgQuery: boolean = false
 
   constructor(channel: string, msgId: string, data: Record<string, any>) {
-    makeAutoObservable(this)
+    makeAutoObservable(this, {updateMsg: action.bound})
     this.channel = channel
     this.msgId = msgId
     this.ts = data.ts
     this.flags = data.flags
+  }
+
+  getMsg(channels: ChannelStore) {
+    // Happy path, the message is already loaded in a channel or locally.
+    if (this.msg !== null) {
+      return this.msg
+    }
+    const msg = channels.channels[this.channel]?.messagesById.get(this.msgId)
+    if (msg !== undefined) {
+      this.msg = msg
+      return msg
+    }
+    // Unhappy path, load the object from Firestore.
+    if (this.startedMsgQuery) {
+      // Already querying so we have to just bail out.
+      return undefined
+    }
+    getDoc(doc(channels.db, "rooms", this.channel, "chats", this.msgId)).then(this.updateMsg, console.error)
+  }
+
+  updateMsg(msg: DocumentSnapshot<DocumentData>) {
+    this.msg = new Message(msg.data())
   }
 }
 
