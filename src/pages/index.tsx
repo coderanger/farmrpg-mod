@@ -11,7 +11,6 @@ import { GlobalContext } from '../utils/context'
 
 const ChannelColumnList = observer(() => {
   const ctx = useContext(GlobalContext)
-  console.log("channels", ctx.state.settings.channels)
   return <>
     {ctx.state.settings.channels.map(chan =>
       <ChannelColumn channelName={chan} key={chan} />

@@ -55,7 +55,8 @@ export class Channel {
   db: Firestore
   channel: string
   paused: boolean = false
-  messages: Message[] = []
+  readonly messages = observable<Message>([])
+  readonly messagesById = observable<string, Message>(new Map)
   unsubscribe: Unsubscribe | null = null
 
   constructor(db: Firestore, channel: string) {
@@ -77,10 +78,15 @@ export class Channel {
 
   onSnapshot(snapshot: QuerySnapshot<DocumentData>) {
     const newMessages: Message[] = []
+    const newMessagesById: Map<string, Message> = new Map
     snapshot.forEach(msg => {
-      newMessages.push(new Message(msg.data()))
+      const newMsg = new Message(msg.data())
+      newMessages.push(newMsg)
+      newMessagesById.set(newMsg.id, newMsg)
     })
-    this.messages = newMessages
+    newMessages.sort((a, b) => b.ts.toMillis() - a.ts.toMillis())
+    this.messages.replace(newMessages)
+    this.messagesById.replace(newMessagesById)
   }
 
   unlisten() {

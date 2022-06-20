@@ -1,11 +1,14 @@
 
-import type { Channel, Message } from "../stores/channels"
 import { observer } from 'mobx-react-lite'
-import { useCallback, useContext, useEffect, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useState } from 'react'
 import CloseButton from 'react-bootstrap/CloseButton'
+
+import { BsFillFlagFill } from '@react-icons/all-files/bs/BsFillFlagFill'
 
 import { GlobalContext } from '../utils/context'
 import { classNames } from '../utils/css'
+
+import type { Channel, Message } from "../stores/channels"
 
 const IMAGE_SRC_RE = /^(?:https:\/\/farmrpg.com)?\/?(.+)$/
 
@@ -50,18 +53,22 @@ const MessageDiv = observer(({msg}: MessageDivProps) => {
   }, [msg.content])
 
   const isMention = !!(ctx.state?.auth.username && msg.mentions.includes(ctx.state?.auth.username))
+  const flags = ctx.state.chatMods.flagsById.get(msg.id)
 
   return <div className={classNames(
     "mb-2",
     {
-      "bg-danger text-light": msg.deleted,
+      "bg-danger text-light": msg.deleted && !msg.focus,
       "border border-info border-3 border-start-0": isMention,
-      "bg-info": msg.focus,
+      "bg-info": msg.focus && !msg.deleted,
     },
   )} css={{
-    transition: "background-color 250ms"
+    transition: "background-color 250ms, color 250ms"
   }} ref={msg.setElement}>
-    <div className={`text-${msg.deleted ? "light" : "secondary"} fw-light fst-italic`}>{msg.ts.toDate().toLocaleString()}</div>
+    <div className="d-flex justify-content-between">
+      <div className={`text-${msg.deleted ? "light" : "secondary"} fw-light fst-italic`}>{msg.ts.toDate().toLocaleString()}</div>
+      <div>{flags && flags.flags > 0 && <span className={msg.deleted ? "text-light" : "text-danger"}>{flags.flags} <BsFillFlagFill /></span>}</div>
+    </div>
     <div className="fw-bold"><img src={`https://farmrpg.com/img/emblems/${msg.emblem}`} css={{height: 16, marginRight: 4}} />{msg.username}</div>
     <div
       ref={fixContent}

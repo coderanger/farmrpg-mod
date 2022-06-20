@@ -20,6 +20,7 @@ import { FaPlus } from "@react-icons/all-files/fa/FaPlus"
 
 import { GlobalContext } from '../utils/context'
 import { MentionsMenu } from './mentions'
+import { FlagsMenu } from './flags'
 
 import type { GlobalContextProps } from '../utils/context'
 
@@ -212,7 +213,7 @@ export default observer(({ children }: LayoutProps) => {
       </p>
     </div>
   } else if (!ctx.state.auth.isStaff) {
-    content = <div>This tool is only for Farm RPM staff members.</div>
+    content = <div>This tool is only for Farm RPG staff members.</div>
   }
 
   useEffect(() => {
@@ -278,6 +279,7 @@ export default observer(({ children }: LayoutProps) => {
           </Dropdown.Menu>
         </Dropdown>
         <MentionsMenu />
+        <FlagsMenu />
       </div>
       {content}
     </main>
