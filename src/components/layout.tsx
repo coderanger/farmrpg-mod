@@ -186,7 +186,7 @@ export default observer(({ children }: LayoutProps) => {
 
   let content = children
 
-  if(!ctx.state?.auth.ready) {
+  if(typeof document === "undefined" || !ctx.state?.auth.ready) {
     // Auth hasn't actually loaded yet.
     content = <>
       <div>Loading ...</div>
