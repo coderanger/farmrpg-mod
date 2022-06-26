@@ -286,7 +286,9 @@ export default observer(({ children }: LayoutProps) => {
         <MentionsMenu />
         <FlagsMenu />
       </div>
-      <LayoutContent ctx={ctx} children={children} />
+      <div>
+        <LayoutContent ctx={ctx} children={children} />
+      </div>
     </main>
   </>)
 })
