@@ -188,15 +188,13 @@ export default observer(({ children }: LayoutProps) => {
 
   if(typeof document === "undefined" || !ctx.state?.auth.ready) {
     // Auth hasn't actually loaded yet.
-    content = <>
-      <div>Loading ...</div>
-    </>
+    content = <div key="layout-loading">Loading ...</div>
   } else if (!ctx.state.auth.loggedIn) {
     // User is logged out.
-    content = <LoginOrRegister ctx={ctx} />
+    content = <LoginOrRegister ctx={ctx} key="login-or-register" />
   } else if (ctx.state.auth.username === null) {
     //
-    content = <div>
+    content = <div key="enrollment">
       <p>
         Your account isn't recognized.
       </p>
@@ -213,7 +211,7 @@ export default observer(({ children }: LayoutProps) => {
       </p>
     </div>
   } else if (!ctx.state.auth.isStaff) {
-    content = <div>This tool is only for Farm RPG staff members.</div>
+    content = <div key="not-allowed">This tool is only for Farm RPG staff members.</div>
   }
 
   useEffect(() => {
