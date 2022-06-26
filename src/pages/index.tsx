@@ -11,12 +11,12 @@ import { GlobalContext } from '../utils/context'
 
 const ChannelColumnList = observer(() => {
   const ctx = useContext(GlobalContext)
-  return <>
+  return <div className="d-flex gap-3" data-type="channelColumnList" key="channelColumnList">
     {ctx.state.settings.channels.map(chan =>
       <ChannelColumn channelName={chan} key={chan} />
     )}
-    {ctx.state.settings.channels.length === 0 && <div>Use the + button in the sidebar to add some channels.</div>}
-  </>
+    {ctx.state.settings.channels.length === 0 && <div key="empty-disclaimer">Use the + button in the sidebar to add some channels.</div>}
+  </div>
 })
 
 const IndexPage = observer(() => {
@@ -38,9 +38,7 @@ const IndexPage = observer(() => {
 
   return (
     <Layout>
-      <div className="d-flex gap-3">
-        <ChannelColumnList />
-      </div>
+      <ChannelColumnList />
     </Layout>
   )
 })
