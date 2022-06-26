@@ -183,7 +183,12 @@ interface LayoutContentProps {
 }
 
 const LayoutContent = observer(({ctx, children}: LayoutContentProps) => {
-  if(typeof document === "undefined" || !ctx.state?.auth.ready) {
+  if (typeof document === "undefined") {
+    // SSR. Preferably this would return the loading div below but that's causing random
+    // errors during hydration where it keeps the layout-loading div instead of the correct
+    // wrapper div for the channel list.
+    return <></>
+  } else if (!ctx.state?.auth.ready) {
     // Auth hasn't actually loaded yet.
     return <div data-type="layout-loading" key="layout-loading">Loading ...</div>
   } else if (!ctx.state.auth.loggedIn) {
