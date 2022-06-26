@@ -185,7 +185,7 @@ interface LayoutContentProps {
 const LayoutContent = observer(({ctx, children}: LayoutContentProps) => {
   if(typeof document === "undefined" || !ctx.state?.auth.ready) {
     // Auth hasn't actually loaded yet.
-    return <div key="layout-loading">Loading ...</div>
+    return <div data-type="layout-loading" key="layout-loading">Loading ...</div>
   } else if (!ctx.state.auth.loggedIn) {
     // User is logged out.
     return <LoginOrRegister ctx={ctx} key="login-or-register" />
@@ -286,9 +286,7 @@ export default observer(({ children }: LayoutProps) => {
         <MentionsMenu />
         <FlagsMenu />
       </div>
-      <div>
-        <LayoutContent ctx={ctx} children={children} />
-      </div>
+      <LayoutContent ctx={ctx} children={children} />
     </main>
   </>)
 })
