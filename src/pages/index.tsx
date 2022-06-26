@@ -9,8 +9,13 @@ import { ChannelColumn } from '../components/channel'
 import Layout from '../components/layout'
 import { GlobalContext } from '../utils/context'
 
-const ChannelColumnList = observer(() => {
-  const ctx = useContext(GlobalContext)
+import type { GlobalContextProps } from "../utils/context"
+
+interface ChannelColumnListProps {
+  ctx: GlobalContextProps
+}
+
+const ChannelColumnList = observer(({ctx}: ChannelColumnListProps) => {
   return <div className="d-flex gap-3" data-type="channelColumnList" key="channelColumnList">
     {ctx.state.settings.channels.map(chan =>
       <ChannelColumn channelName={chan} key={chan} />
@@ -38,7 +43,7 @@ const IndexPage = observer(() => {
 
   return (
     <Layout>
-      <ChannelColumnList />
+      <ChannelColumnList ctx={ctx} />
     </Layout>
   )
 })
