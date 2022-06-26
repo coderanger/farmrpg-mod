@@ -1,4 +1,5 @@
 
+import { decode } from 'html-entities'
 import { observer } from 'mobx-react-lite'
 import React, { useContext, useMemo } from 'react'
 import Dropdown from 'react-bootstrap/Dropdown'
@@ -43,7 +44,7 @@ const Flag = observer(({flag, state}: FlagProps) => {
       display: "-webkit-box",
       "-webkit-box-orient": "vertical",
       "-webkit-line-clamp": "3",
-    }}>{msg.content}</div>
+    }}>{decode(msg.content)}</div>
   </Dropdown.Item>
 })
 
