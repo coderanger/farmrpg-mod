@@ -28,7 +28,7 @@ interface LoginProps {
   ctx: GlobalContextProps
 }
 
-const Login = ({ctx}: LoginProps) => {
+const Login = observer(({ctx}: LoginProps) => {
   const onSubmit: React.FormEventHandler<HTMLFormElement> = async (evt) => {
     const form = evt.currentTarget
     evt.preventDefault()
@@ -57,13 +57,13 @@ const Login = ({ctx}: LoginProps) => {
       Log In
     </Button>
   </Form>
-}
+})
 
 interface RegisterProps {
   ctx: GlobalContextProps
 }
 
-const Register = ({ctx}: RegisterProps) => {
+const Register = observer(({ctx}: RegisterProps) => {
   const [validated, setValidated] = useState(false)
   const [firebaseError, setFirebaseError] = useState<string | null>(null)
 
@@ -137,13 +137,13 @@ const Register = ({ctx}: RegisterProps) => {
       Register
     </Button>
   </Form>
-}
+})
 
 interface LoginOrRegisterProps {
   ctx: GlobalContextProps
 }
 
-const LoginOrRegister = ({ctx}: LoginOrRegisterProps) => {
+const LoginOrRegister = observer(({ctx}: LoginOrRegisterProps) => {
   const [loginMode, setLoginMode] = useState(true)
 
   if (loginMode) {
@@ -163,7 +163,7 @@ const LoginOrRegister = ({ctx}: LoginOrRegisterProps) => {
     <Register ctx={ctx} />
   </div>
   }
-}
+})
 
 const ChannelMenuList = observer(() => {
   const ctx = useContext(GlobalContext)
@@ -177,24 +177,21 @@ const ChannelMenuList = observer(() => {
   </>
 })
 
-interface LayoutProps {
+interface LayoutContentProps {
+  ctx: GlobalContextProps
   children: React.ReactNode
 }
 
-export default observer(({ children }: LayoutProps) => {
-  const ctx = useContext(GlobalContext)
-
-  let content = children
-
+const LayoutContent = observer(({ctx, children}: LayoutContentProps) => {
   if(typeof document === "undefined" || !ctx.state?.auth.ready) {
     // Auth hasn't actually loaded yet.
-    content = <div key="layout-loading">Loading ...</div>
+    return <div key="layout-loading">Loading ...</div>
   } else if (!ctx.state.auth.loggedIn) {
     // User is logged out.
-    content = <LoginOrRegister ctx={ctx} key="login-or-register" />
+    return <LoginOrRegister ctx={ctx} key="login-or-register" />
   } else if (ctx.state.auth.username === null) {
     //
-    content = <div key="enrollment">
+    return <div key="enrollment">
       <p>
         Your account isn't recognized.
       </p>
@@ -211,8 +208,18 @@ export default observer(({ children }: LayoutProps) => {
       </p>
     </div>
   } else if (!ctx.state.auth.isStaff) {
-    content = <div key="not-allowed">This tool is only for Farm RPG staff members.</div>
+    return <div key="not-allowed">This tool is only for Farm RPG staff members.</div>
   }
+  // Default case.
+  return <>{children}</>
+})
+
+interface LayoutProps {
+  children: React.ReactNode
+}
+
+export default observer(({ children }: LayoutProps) => {
+  const ctx = useContext(GlobalContext)
 
   useEffect(() => {
     const clipboard = new ClipboardJS(".clipboard")
@@ -279,7 +286,7 @@ export default observer(({ children }: LayoutProps) => {
         <MentionsMenu />
         <FlagsMenu />
       </div>
-      {content}
+      <LayoutContent ctx={ctx} children={children} />
     </main>
   </>)
 })
